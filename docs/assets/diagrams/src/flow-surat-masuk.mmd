@@ -1,0 +1,21 @@
+flowchart TD
+    A(["Mulai"]) --> B["UI: pilih Tambah / Edit / Hapus"]
+    B --> C{"Role & menu?"}
+    C -- "Tambah: hanya admin" --> D["Tampilkan form (zod schema)"]
+    C -- "Edit: admin & pimpinan" --> D
+    C -- "Hapus: hanya admin" --> E["DropdownAction → Hapus"]
+    D --> F["Submit → server action"]
+    F --> G["Upload file (bila ada)<br/>uploadFile → bucket images/surat-masuk"]
+    G --> H{"Upload sukses?"}
+    H -- "Gagal" --> I["Kembalikan error _form"] --> B
+    H -- "Sukses" --> J["INSERT/UPDATE surat_masuk"]
+    J --> K["Log surat_logs: create/update"]
+    K --> L{Status = diarsipkan?}
+    L -- "Tidak" --> M["revalidatePath + toast"]
+    L -- "Ya" --> N["Panggil archiveSuratRecord<br/>(lihat diagram arsip otomatis)"]
+    N --> M
+    M --> O(["Selesai"])
+    E --> P["DialogDelete → server action deleteSuratMasuk"]
+    P --> Q["File dihapus dari storage (bila ada)"]
+    Q --> R["Soft delete: is_deleted=true, deleted_at=now()"]
+    R --> S["Log surat_logs: delete"] --> M

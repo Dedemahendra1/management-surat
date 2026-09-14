@@ -1,0 +1,100 @@
+classDiagram
+    direction LR
+
+    class SuratMasukManagement {
+        -useDataTable
+        -listSurat
+        -listTrash
+        -role
+        +renderTable()
+        +handleAction(action, id)
+    }
+    class SuratKeluarManagement {
+        -useDataTable
+        -listSurat
+        -listTrash
+        -role
+        +renderTable()
+        +handleAction(action, id)
+    }
+    class ArchiveManagement {
+        -useDataTable
+        -listArchive
+        -listTrash
+        -categories
+        +renderTable()
+    }
+    class CategoryManagement {
+        -useDataTable
+        -categories
+        +renderTable()
+    }
+    class UserManagement {
+        -useDataTable
+        -users
+        +renderTable()
+    }
+    class AdminDashboardPage {
+        -role
+        +StatCard/RecentSurat/RecentActivity/Chart
+    }
+
+    class DataTable
+    class DropdownAction
+    class DialogDelete
+    class PaginationDataTable
+    class FormInput
+    class FormSelect
+    class FormImage
+    class AppSidebar {
+        -SIDEBAR_MENU_LIST
+        -profile
+        +signOut()
+    }
+    class DialogDetailSuratMasuk
+    class DialogDetailSuratKeluar
+    class DialogDetailArchive
+    class FormSuratMasuk
+    class FormSuratKeluar
+    class FormArchive
+    class FormCategory
+    class FormUser
+    class DialogCreateUser
+    class DialogUpdateUser
+    class DialogDeleteUser
+
+    SuratMasukManagement --> DataTable
+    SuratMasukManagement --> DropdownAction
+    SuratMasukManagement --> DialogDetailSuratMasuk
+    SuratMasukManagement --> FormSuratMasuk
+    SuratMasukManagement --> DialogDelete
+    SuratKeluarManagement --> DataTable
+    SuratKeluarManagement --> DropdownAction
+    SuratKeluarManagement --> DialogDetailSuratKeluar
+    SuratKeluarManagement --> FormSuratKeluar
+    SuratKeluarManagement --> DialogDelete
+    ArchiveManagement --> DataTable
+    ArchiveManagement --> DialogDetailArchive
+    ArchiveManagement --> FormArchive
+    ArchiveManagement --> DialogDelete
+    CategoryManagement --> FormCategory
+    CategoryManagement --> DialogDelete
+    UserManagement --> FormUser
+    UserManagement --> DialogCreateUser
+    UserManagement --> DialogUpdateUser
+    UserManagement --> DialogDeleteUser
+    AppSidebar ..> useAuthStore : dependency
+    AdminDashboardPage ..> useAuthStore : dependency
+    DataTable --> PaginationDataTable : pagination
+    FormSuratMasuk --> FormInput
+    FormSuratMasuk --> FormSelect
+    FormSuratMasuk --> FormImage
+    FormSuratKeluar --> FormInput
+    FormSuratKeluar --> FormSelect
+    FormSuratKeluar --> FormImage
+    FormArchive --> FormInput
+    FormArchive --> FormSelect
+    FormArchive --> FormImage
+    FormCategory --> FormInput
+    FormUser --> FormInput
+    FormUser --> FormImage

@@ -1,0 +1,19 @@
+flowchart TD
+    A(["Mulai"]) --> B[Pengguna membuka aplikasi]
+    B --> C{Session valid?}
+    C -- "Tidak" --> D["Proxy redirect ke /login"]
+    C -- "Ya" --> E["Landing page (/)"]
+    D --> F[Form login: email + password]
+    F --> G{"Validasi Zod<br/>loginSchemaForm"}
+    G -- "Gagal" --> H[Tampilkan error form] --> F
+    G -- "Sukses" --> I["Server action login"]
+    I --> J["supabase.auth.signInWithPassword"]
+    J --> K{Berhasil?}
+    K -- "Gagal" --> H
+    K -- "Sukses" --> L["Ambil profil dari tabel profiles"]
+    L --> M["Set cookie user_profile<br/>httpOnly, lax, maxAge 1 thn"]
+    M --> N["revalidatePath + redirect('/')"]
+    N --> E
+    E --> O["Root layout baca cookie user_profile"]
+    O --> P["AuthStoreProvider → useAuthStore"]
+    P --> Q(["Selesai: sesi & profil aktif"])

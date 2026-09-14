@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph ADMIN["LANE: ADMIN (petugas)"]
+        direction TB
+        A1(["Mulai: menu Surat Masuk → Tambah"]) --> A2[Isi formulir surat]
+        A2 --> A3["Pilih lampiran file (opsional)"]
+        A3 --> A4[Submit]
+        A5[Selesai, daftar diperbarui]
+    end
+
+    subgraph SISTEM["LANE: SISTEM"]
+        direction TB
+        S1[Validasi Zod schemaSuratMasuk]
+        S2[Aksi createSuratMasuk]
+        S3{"Ada file?"}
+        S4["uploadFile → bucket images/surat-masuk"]
+        S5["INSERT surat_masuk"]
+        S6[Log surat_logs: create]
+        S7{Status = diarsipkan?}
+        S8["Panggil archiveSuratRecord"]
+        S9["revalidatePath + toast sukses"]
+    end
+
+    A4 --> S1
+    S1 -- "invalid" -->  A2
+    S1 -- "valid" --> S2 --> S3
+    S3 -- "Ya" --> S4 -- "sukses" --> S5
+    S3 -- "Tidak" --> S5
+    S5 --> S6 --> S7
+    S7 -- "Tidak" --> S9 --> A5
+    S7 -- "Ya" --> S8 --> S9 --> A5
+    A5 --> FIN(["Selesai"])

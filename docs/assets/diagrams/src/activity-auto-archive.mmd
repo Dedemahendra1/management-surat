@@ -1,0 +1,12 @@
+flowchart LR
+    subgraph SISTEM["LANE: SISTEM"]
+        direction TB
+        A(["Mulai: status surat menjadi diarsipkan"]) --> B["archiveSuratRecord"]
+        B --> C{"Sudah pernah di-archive?<br/>cek archive_logs action=auto_archive<br/>+ details surat_id & surat_type"}
+        C -- "Ya" --> D["UPDATE archives (sinkronisasi)"]
+        C -- "Tidak" --> E["getOrCreateCategory (Surat Masuk / Keluar)"]
+        E --> G["INSERT archives<br/>title='{nomor} — {perihal}'"]
+        G --> H["Log archive_logs: create"]
+        H --> I["Log archive_logs: auto_archive<br/>(details {surat_id, surat_type})"]
+        D & I --> J(["Selesai"])
+    end

@@ -1,0 +1,10 @@
+flowchart TD
+    A(["Mulai: archiveSuratRecord"]) --> B["Cek de-duplikasi archive_logs<br/>action='auto_archive' AND<br/>details->>surat_id & details->>surat_type"]
+    B --> C{Arsip sudah ada?}
+    C -- "Ya (baris + archive_id)" --> D["UPDATE archives (sinkronisasi judul,<br/>tanggal, deskripsi)"]
+    D --> E(["Selesai (tidak ada duplikat)"])
+    C -- "Tidak" --> F["getOrCreateCategory<br/>(Surat Masuk / Surat Keluar)"]
+    F --> G["INSERT archives:<br/>title='{nomor} — {perihal}',<br/>created_by=user.id, date, description"]
+    G --> H["Log archive_logs: create"]
+    H --> I["Log archive_logs: auto_archive<br/>details={surat_id, surat_type}"]
+    I --> J(["Selesai: arsip baru dibuat"])

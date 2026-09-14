@@ -1,0 +1,91 @@
+erDiagram
+    auth_users ||--o| profiles : "1:1 (trigger)"
+    profiles ||--o{ surat_masuk : "created_by"
+    profiles ||--o{ surat_keluar : "created_by"
+    profiles ||--o{ archives : "created_by"
+    profiles ||--o{ surat_logs : "user_id"
+    profiles ||--o{ archive_logs : "user_id"
+
+    surat_masuk ||--o{ surat_keluar : "surat_masuk_id"
+    surat_masuk ||--o{ surat_logs : "polimorfik surat_id+surat_type"
+    surat_keluar ||--o{ surat_logs : "polimorfik surat_id+surat_type"
+
+    archive_categories ||--o{ archives : "category_id"
+    archives ||--o{ archive_logs : "archive_id"
+
+    auth_users {
+        uuid id PK
+        text email
+        jsonb raw_user_meta_data
+    }
+    profiles {
+        uuid id PK "FK auth.users"
+        text name
+        text role
+        text avatar_url
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    surat_masuk {
+        uuid id PK
+        text nomor
+        date tanggal
+        text asal_surat
+        text perihal
+        text status
+        text disposisi
+        text keterangan
+        text file_url
+        text lokasi_lemari
+        text lokasi_rak
+        boolean is_deleted
+        uuid created_by FK "profiles.id"
+    }
+    surat_keluar {
+        uuid id PK
+        text nomor
+        date tanggal
+        text tujuan
+        text perihal
+        text status
+        uuid surat_masuk_id FK "surat_masuk.id"
+        text keterangan
+        text file_url
+        boolean is_deleted
+        uuid created_by FK "profiles.id"
+    }
+    surat_logs {
+        uuid id PK
+        uuid user_id FK "profiles.id"
+        uuid surat_id
+        text surat_type
+        text action
+        jsonb details
+    }
+    archive_categories {
+        uuid id PK
+        text name "unique"
+        text description
+        text color
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    archives {
+        uuid id PK
+        uuid category_id FK "archive_categories.id"
+        uuid created_by FK "profiles.id"
+        text title
+        text number
+        date date
+        text description
+        text file_url
+        text file_path
+        boolean is_deleted
+    }
+    archive_logs {
+        uuid id PK
+        uuid user_id FK "profiles.id"
+        uuid archive_id FK "archives.id"
+        text action
+        jsonb details
+    }

@@ -1,0 +1,32 @@
+sequenceDiagram
+    actor U as Pengguna (admin/pimpinan)
+    participant UI as Arsip (list/dialog)
+    participant SA as Server Action archive
+    participant ST as Storage (bucket images/archives)
+    participant DB as Database (archives, archive_logs)
+
+    alt Tambah / Ubah
+        U->>UI: isi form (opsional file)
+        UI->>SA: createArchive / updateArchive
+        opt file baru
+            SA->>ST: uploadFile('images','archives', file)
+            ST-->>SA: { url, path }
+        end
+        SA->>DB: INSERT/UPDATE archives
+        SA->>DB: INSERT archive_logs(create/update)
+    else Hapus
+        U->>UI: klik Hapus
+        UI->>SA: deleteArchive(id, filePath?)
+        opt ada filePath
+            SA->>ST: deleteFile('images', filePath)
+        end
+        SA->>DB: UPDATE archives SET is_deleted=true, deleted_at=now()
+        SA->>DB: INSERT archive_logs(delete)
+    else Restore (dari Sampah)
+        U->>UI: klik Pulihkan
+        UI->>SA: restoreArchive(id)
+        SA->>DB: UPDATE archives SET is_deleted=false
+        SA->>DB: INSERT archive_logs(restore)
+    end
+    SA-->>UI: toast sukses + revalidatePath
+    UI-->>U: tabel termuat ulang

@@ -1,0 +1,7 @@
+flowchart TD
+    A(["Mulai"]) --> B["Server action kategori"]
+    B --> C{Aksi}
+    C -- "Tambah" --> D["INSERT archive_categories"]
+    C -- "Ubah" --> E["UPDATE archive_categories"]
+    C -- "Hapus" --> F["DELETE archive_categories (hard delete)"]
+    D & E & F --> G(["Selesai"])

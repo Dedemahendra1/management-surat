@@ -1,0 +1,26 @@
+flowchart LR
+    subgraph PENGGUNA["LANE: PENGGUNA"]
+        direction TB
+        P1(["Mulai: buka aplikasi"]) --> P2[Isi email & password]
+        P2 --> P3[Kirim formulir login]
+        P3 --> P4{Tampilkan error?}
+        P4 -- "Ya (kembali ulangi)" --> P2
+        P5[Terima sesi, lanjut ke halaman utama]
+    end
+
+    subgraph SISTEM["LANE: SISTEM"]
+        direction TB
+        S1[Validasi Zod loginSchemaForm]
+        S2["supabase.auth.signInWithPassword"]
+        S3["Ambil profil dari tables: profiles"]
+        S4["Set cookie user_profile<br/>(httpOnly, sameSite lax, maxAge 1 thn)"]
+        S5["revalidatePath + redirect('/')"]
+        S6["Root layout → AuthStoreProvider → useAuthStore"]
+    end
+
+    P3 --> S1
+    S1 -- "valid" --> S2
+    S1 -- "invalid" --> P4
+    S2 -- "sukses" --> S3 --> S4 --> S5 --> S6 --> P5
+    S2 -- "gagal" --> P4
+    P5 --> FIN(["Selesai"])

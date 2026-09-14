@@ -1,0 +1,16 @@
+flowchart TD
+    A(["Request masuk"]) --> B["updateSession: susun server client"]
+    B --> C["supabase.auth.getUser()"]
+    C --> D{Ada user?}
+    D -- "Tidak" --> E{Path = /login?}
+    E -- "Tidak" --> F["Redirect → /login"]
+    E -- "Ya" --> G[Lanjutkan]
+    D -- "Ya" --> H{Path = /login?}
+    H -- "Ya" --> I["Redirect → /"]
+    H -- "Tidak" --> J["Baca cookie user_profile → role"]
+    J --> K{Role = pimpinan?}
+    K -- "Tidak" --> G
+    K -- "Ya" --> L{"Path dimulai /admin/user atau<br/>/admin/archive/category?"}
+    L -- "Ya" --> M["Redirect → /admin"]
+    L -- "Tidak" --> G
+    G --> N(["Selesai: request dilanjutkan"])

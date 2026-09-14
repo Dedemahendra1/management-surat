@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor PM as Pimpinan
+    participant UI as Surat Keluar (list/detail)
+    participant SA as Server Action approveSuratKeluar
+    participant DB as Database (surat_keluar, surat_logs)
+
+    PM->>UI: klik 'Setujui'
+    UI->>SA: approveSuratKeluar(id, userId, role)
+    SA->>SA: getUserRole() → role
+    alt role ≠ 'pimpinan'
+        SA-->>UI: { status:'error', _form: 'Hanya pimpinan...' }
+        UI-->>PM: tampilkan error
+    else role = 'pimpinan'
+        SA->>DB: SELECT status surat_keluar
+        alt status ≠ 'dibuat'
+            SA-->>UI: error 'Hanya surat berstatus Dibuat...'
+            UI-->>PM: tampilkan error
+        else status = 'dibuat'
+            SA->>DB: UPDATE surat_keluar SET status='disetujui'
+            SA->>DB: INSERT surat_logs(action='approve', details={role})
+            SA-->>UI: { status:'success' }
+            UI-->>PM: toast 'Surat berhasil disetujui'
+        end
+    end

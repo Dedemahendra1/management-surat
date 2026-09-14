@@ -1,0 +1,12 @@
+flowchart TD
+    A(["Mulai"]) --> B{"Pengguna: role pimpinan?"}
+    B -- "Bukan pimpinan" --> C["Server action tolak:<br/>'Hanya pimpinan yang dapat menyetujui'"]
+    C --> D(["Selesai: error"])
+    B -- "Pimpinan" --> E["Klik Setujui<br/>(dropdown atau dialog detail)"]
+    E --> F["Server action approveSuratKeluar"]
+    F --> G{Status = dibuat?}
+    G -- "Tidak" --> H["Error: 'Hanya surat berstatus Dibuat yang dapat disetujui'"]
+    H --> D
+    G -- "Ya" --> I["UPDATE surat_keluar → status='disetujui'"]
+    I --> J["Log surat_logs: approve<br/>(details {role:'pimpinan'})"]
+    J --> K(["Selesai: disetujui"])

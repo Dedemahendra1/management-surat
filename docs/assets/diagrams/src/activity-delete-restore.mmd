@@ -1,0 +1,29 @@
+flowchart LR
+    subgraph PENGGUNA["LANE: PENGGUNA (admin/pimpinan)"]
+        direction TB
+        U1(["Mulai: buka tabel (Surat Masuk / Keluar / Arsip)"]) --> U2[Pilih tab 'Sampah'?]
+        U2 -- "Tidak (data aktif)" --> U3[Pilih aksi: Hapus / Restore]
+        U2 -- "Ya (tab sampah)" --> U4[Pilih baris → Pulihkan]
+        U5[Terima hasil + toast]
+    end
+
+    subgraph SISTEM["LANE: SISTEM"]
+        direction TB
+        S1["Aksi delete / restore"]
+        S2{Hapus?}
+        S3{"Ada file_path?"}
+        S4["deleteFile → hapus dari storage"]
+        S5["Soft delete: is_deleted=true, deleted_at=now()"]
+        S6["Log: delete"]
+        S7["Restore: is_deleted=false"]
+        S8["Log: restore"]
+        S9[revalidatePath + toast]
+    end
+
+    U3 --> S1; U4 --> S1
+    S1 --> S2
+    S2 -- "Ya (hapus)" --> S3
+    S3 -- "Ya" --> S4 --> S5 --> S6 --> S9
+    S3 -- "Tidak" --> S5
+    S2 -- "Tidak (restore)" --> S7 --> S8 --> S9
+    S9 --> U5 --> FIN(["Selesai"])

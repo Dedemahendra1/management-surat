@@ -1,0 +1,7 @@
+flowchart TD
+    A(["Mulai"]) --> B["Server action user"]
+    B --> C{Aksi}
+    C -- "Tambah" --> D["createUser: client isAdmin (service role)<br/>auth.admin.createUser + email_confirm:<br/>profil otomatis dibuat trigger"]
+    C -- "Ubah" --> E["updateUser: client anon<br/>UPDATE profiles langsung"]
+    C -- "Hapus" --> F["deleteUser: hapus avatar dari storage<br/>+ auth.admin.deleteUser<br/>(profil ikut terhapus trigger)"]
+    D & E & F --> G(["Selesai"])

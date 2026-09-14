@@ -1,0 +1,92 @@
+classDiagram
+    direction LR
+
+    class SupaServerClient {
+        -cookies()
+        -isAdmin: boolean
+        +createClient()
+    }
+    class SupaBrowserClient {
+        +createClient()
+    }
+    class StorageAction {
+        +uploadFile(bucket, path, file, prevPath)
+        +deleteFile(bucket, path)
+    }
+    class SuratArchiveLib {
+        +archiveSuratRecord(type, surat, userId)
+        +getOrCreateCategory(name)
+        -CATEGORY_META
+    }
+    class FormatLib {
+        +formatDate(date)
+        +formatDateTime(date)
+        +formatFileSize(bytes)
+    }
+    class AuthActions {
+        +login(prevState, formData)
+        +signOut()
+    }
+    class SuratMasukActions {
+        +createSuratMasuk(prevState, formData)
+        +updateSuratMasuk(prevState, formData)
+        +deleteSuratMasuk(id, filePath)
+        +restoreSuratMasuk(id)
+        +getUserRole(id)
+    }
+    class SuratKeluarActions {
+        +createSuratKeluar(prevState, formData)
+        +updateSuratKeluar(prevState, formData)
+        +approveSuratKeluar(id, role)
+        +deleteSuratKeluar(id, filePath)
+        +restoreSuratKeluar(id)
+        +getUserRole(id)
+    }
+    class ArchiveActions {
+        +createArchive(prevState, formData)
+        +updateArchive(prevState, formData)
+        +deleteArchive(id, filePath)
+        +restoreArchive(id)
+        +getUserRole(id)
+    }
+    class CategoryActions {
+        +createCategory(prevState, formData)
+        +updateCategory(prevState, formData)
+        +deleteCategory(id)
+    }
+    class UserActions {
+        +createUser(prevState, formData)
+        +updateUser(prevState, formData)
+        +deleteUser(id, avatarPath)
+    }
+    class Proxy {
+        +proxy(request)
+        +config.matcher
+    }
+    class UpdateSession {
+        +updateSession(request)
+    }
+    class Environment {
+        SUPABASE_URL
+        SUPABASE_ANON_KEY
+        SUPABASE_SERVICE_ROLE_KEY
+    }
+
+    SuratMasukActions --> SupaServerClient
+    SuratMasukActions --> StorageAction
+    SuratMasukActions --> SuratArchiveLib
+    SuratKeluarActions --> SupaServerClient
+    SuratKeluarActions --> StorageAction
+    SuratKeluarActions --> SuratArchiveLib
+    SuratKeluarActions ..> SuratMasukActions : getUserRole
+    ArchiveActions --> SupaServerClient
+    ArchiveActions --> StorageAction
+    CategoryActions --> SupaServerClient
+    UserActions --> SupaServerClient
+    UserActions --> StorageAction
+    AuthActions --> SupaServerClient
+    StorageAction --> SupaServerClient
+    Proxy --> UpdateSession
+    UpdateSession --> SupaServerClient
+    SupaServerClient --> Environment
+    SupaBrowserClient --> Environment

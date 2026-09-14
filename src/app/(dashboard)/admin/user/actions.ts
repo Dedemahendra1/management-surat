@@ -52,17 +52,16 @@ export async function createUser(prevState: AuthFormState, formData: FormData) {
     };
   }
 
-  const supabase = await createClient();
+  const supabase = await createClient({ isAdmin: true });
 
-  const { error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.admin.createUser({
     email: validatedFields.data.email,
     password: validatedFields.data.password,
-    options: {
-      data: {
-        name: validatedFields.data.name,
-        role: validatedFields.data.role,
-        avatar_url: validatedFields.data.avatar_url,
-      },
+    email_confirm: true,
+    user_metadata: {
+      name: validatedFields.data.name,
+      role: validatedFields.data.role,
+      avatar_url: validatedFields.data.avatar_url,
     },
   });
 

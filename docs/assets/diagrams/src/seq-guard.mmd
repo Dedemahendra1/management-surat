@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant BR as Browser (request)
+    participant PX as src/proxy.ts (updateSession)
+    participant SP as Supabase Auth
+    participant CK as Cookie user_profile
+
+    BR->>PX: request ke /admin/<path>
+    PX->>PX: createServerClient (anon + cookie request)
+    PX->>SP: auth.getUser()
+    SP-->>PX: user | null
+
+    alt tidak ada user & bukan /login
+        PX-->>BR: 307 Redirect → /login
+    else ada user & path = /login
+        PX-->>BR: 307 Redirect → /
+    else ada user
+        PX->>CK: baca user_profile → role
+        alt role = 'pimpinan' && path.startsWith('/admin/user' OR '/admin/archive/category')
+            PX-->>BR: 307 Redirect → /admin
+        else lainnya
+            PX-->>BR: NextResponse.next() (lanjut)
+        end
+    end

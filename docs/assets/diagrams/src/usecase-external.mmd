@@ -1,0 +1,15 @@
+flowchart LR
+    subgraph Sys["Sistem Manajemen Surat & Arsip Digital"]
+        direction TB
+        L((Login))
+        B((Unggah & Unduh Berkas))
+        D((Baca / Tulis Data Surat & Arsip))
+    end
+
+    SUP(["Supabase"])
+    SUP2(["Supabase Storage<br/>(bucket images)"])
+    SUP3(["Supabase Auth"])
+
+    L -.->|dependency| SUP3
+    B -.->|dependency| SUP2
+    D -.->|dependency| SUP

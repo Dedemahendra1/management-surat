@@ -1,0 +1,27 @@
+flowchart LR
+    subgraph PIMPINAN["LANE: PIMPINAN"]
+        direction TB
+        P1(["Mulai: buka Surat Keluar"]) --> P2[Lihat daftar / detail]
+        P3["Klik 'Setujui'<br/>(dropdown atau dialog detail)"]
+        P4["Terima hasil: disetujui / error"]
+    end
+
+    subgraph SISTEM["LANE: SISTEM"]
+        direction TB
+        S1["Server action approveSuratKeluar"]
+        S2{Role = pimpinan?}
+        S3["Tolak: error role"]
+        S4{Status = dibuat?}
+        S5["Tolak: error status"]
+        S6["UPDATE surat_keluar → status='disetujui'"]
+        S7["Log surat_logs: approve<br/>(details {role:'pimpinan'})"]
+    end
+
+    P1 --> P2 --> P3 --> S1 --> S2
+    S2 -- "bukan pimpinan" --> S3 --> P4
+    S2 -- "pimpinan" --> S4
+    S4 -- "bukan dibuat" --> S5 --> P4
+    S4 -- "dibuat" --> S6 --> S7 --> P4
+    P4 -- "sukses" --> P2
+    P4 -- "error ditampilkan" --> P2
+    P4 -- "sukses" --> FIN(["Selesai"])

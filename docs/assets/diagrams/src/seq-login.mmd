@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as Pengguna
+    participant F as Form Login (Client)
+    participant A as Server Action login
+    participant SP as Supabase Auth
+    participant DB as Database (profiles)
+    participant CK as Cookie user_profile
+
+    U->>F: isi email & password, submit
+    F->>A: login(FormData)
+    A->>A: validasi Zod loginSchemaForm
+    alt validasi gagal
+        A-->>F: { status: 'error', errors.fieldErrors }
+        F-->>U: tampilkan error form
+    else validasi sukses
+        A->>SP: signInWithPassword(email, password)
+        alt kredensial salah
+            SP-->>A: error
+            A-->>F: { status: 'error', errors._form }
+            F-->>U: tampilkan error login
+        else sukses
+            SP-->>A: user
+            A->>DB: SELECT * FROM profiles WHERE id = user.id
+            DB-->>A: profile
+            A->>CK: set user_profile = JSON.stringify(profile)
+            Note over CK: httpOnly, path=/, sameSite=lax, maxAge=365h
+            A->>A: revalidatePath('/', 'layout')
+            A-->>U: redirect('/')
+        end
+    end

@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor AD as Admin (petugas)
+    participant UI as Form Surat Masuk
+    participant SA as Server Action createSuratMasuk
+    participant ST as Storage (bucket images)
+    participant DB as Database (surat_masuk, surat_logs)
+    participant ARC as archiveSuratRecord (lib)
+
+    AD->>UI: isi data + pilih file
+    UI->>SA: submit action (state-form)
+    SA->>SA: validasi schemaSuratMasuk
+
+    opt ada file
+        SA->>ST: uploadFile('images', 'surat-masuk', file)
+        ST-->>SA: { url, path }
+    end
+
+    SA->>DB: INSERT surat_masuk
+    SA->>DB: INSERT surat_logs(action='create')
+
+    alt status = 'diarsipkan'
+        SA->>ARC: archiveSuratRecord()
+        ARC->>DB: Cek archive_logs (auto_archive + surat_id/type)
+        alt sudah ada arsip
+            ARC->>DB: UPDATE archives (sinkronisasi)
+        else belum ada
+            ARC->>DB: getOrCreateCategory('Surat ...')
+            ARC->>DB: INSERT archives
+            ARC->>DB: INSERT archive_logs(action='create')
+            ARC->>DB: INSERT archive_logs(action='auto_archive')
+        end
+        ARC-->>SA: selesai
+    end
+
+    SA-->>UI: toast sukses + revalidatePath
+    UI-->>AD: daftar surat termuat ulang

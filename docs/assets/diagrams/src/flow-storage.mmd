@@ -1,0 +1,11 @@
+flowchart TD
+    A(["Mulai uploadFile"]) --> B{"Ada prevPath?"}
+    B -- "Ya" --> C["Hapus file lama dari bucket"]
+    C --> D{Sukses?}
+    D -- "Gagal" --> E(["Error _form"])
+    D -- "Sukses" --> F["Upload: bucket/path/{Date.now()}-{nama}"]
+    B -- "Tidak" --> F
+    F --> G{Sukses?}
+    G -- "Gagal" --> E
+    G -- "Sukses" --> H["Kembalikan {url publik, path}"]
+    H --> I(["Selesai"])

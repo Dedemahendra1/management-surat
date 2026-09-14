@@ -1,0 +1,11 @@
+flowchart TD
+    A(["Mulai: pilih aksi"]) --> B{Aksi}
+    B -- "Tambah" --> C["Form create → uploadFile (archives) → INSERT archives"]
+    B -- "Ubah" --> D["Form update → uploadFile (hapus file lama bila diganti) → UPDATE"]
+    B -- "Hapus" --> E["deleteFile (bila ada) → soft delete is_deleted=true"]
+    B -- "Pulihkan" --> F["restoreArchive → is_deleted=false + log restore"]
+    B -- "Detail" --> G["Dialog detail + subquery logs"]
+    C --> H["Log archive_logs: create"]
+    D --> I["Log archive_logs: update"]
+    E --> J["Log archive_logs: delete"]
+    H & I & J & F --> K(["Selesai"])

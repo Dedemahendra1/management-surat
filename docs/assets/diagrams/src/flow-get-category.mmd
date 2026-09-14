@@ -1,0 +1,6 @@
+flowchart TD
+    A(["Mulai"]) --> B["Cari archive_categories<br/>by name = kategori target"]
+    B --> C{Ditemukan?}
+    C -- "Ya" --> D(["Kembalikan kategori"])
+    C -- "Tidak" --> E["INSERT archive_categories<br/>(name, color dari CATEGORY_META)"]
+    E --> D

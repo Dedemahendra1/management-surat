@@ -42,5 +42,29 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (user) {
+    const profileCookie = request.cookies.get('user_profile');
+    let role = '';
+    if (profileCookie) {
+      try {
+        role = JSON.parse(profileCookie.value)?.role ?? '';
+      } catch {
+        role = '';
+      }
+    }
+
+    if (role === 'pimpinan') {
+      const pathname = request.nextUrl.pathname;
+      const isForbiddenForPimpinan =
+        pathname.startsWith('/admin/user') ||
+        pathname.startsWith('/admin/archive/category');
+      if (isForbiddenForPimpinan) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin';
+        return NextResponse.redirect(url);
+      }
+    }
+  }
+
   return supabaseResponse;
 }

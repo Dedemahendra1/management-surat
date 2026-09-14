@@ -1,0 +1,28 @@
+flowchart LR
+    subgraph BROWSER["LANE: BROWSER / PENGGUNA"]
+        direction TB
+        B1(["Mulai: request ke halaman"]) --> B2[Terima respons / redirect]
+    end
+
+    subgraph PROXY["LANE: PROXY (middleware)"]
+        direction TB
+        M1["supabase.auth.getUser()"]
+        M2{"User terautentikasi?"}
+        M3{Akses halaman login?}
+        M4["Redirect → /login"]
+        M5{"Role dari cookie user_profile = pimpinan?"}
+        M6{"Path dimulai /admin/user<br/>atau /admin/archive/category?"}
+        M7["Redirect → /admin"]
+        M8["NextResponse.next() (lanjut)"]
+    end
+
+    B1 --> M1 --> M2
+    M2 -- "Tidak ada user" --> M3
+    M3 -- "bukan /login" --> M4 --> B2
+    M3 -- "/login" --> M8 --> B2
+    M2 -- "Ada user" --> M5
+    M5 -- "Ya (pimpinan)" --> M6
+    M6 -- "Ya" --> M7 --> B2
+    M6 -- "Tidak" --> M8 --> B2
+    M5 -- "Bukan pimpinan" --> M8 --> B2
+    B2 --> FIN(["Selesai"])
