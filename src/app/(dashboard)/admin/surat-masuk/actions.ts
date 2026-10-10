@@ -25,6 +25,19 @@ async function addLog(
   });
 }
 
+async function getUserRole(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  return data?.role;
+}
+
 export async function createSuratMasuk(
   prevState: SuratMasukFormState,
   formData: FormData,
@@ -271,6 +284,18 @@ export async function deleteSuratMasuk(
   const supabase = await createClient();
   const user = await supabase.auth.getUser();
   const userId = user.data.user?.id || '';
+  const role = await getUserRole(supabase, userId);
+
+  if (role !== 'admin') {
+    return {
+      status: 'error',
+      errors: {
+        ...prevState.errors,
+        _form: ['Hanya admin yang dapat menghapus surat masuk'],
+      },
+    };
+  }
+
   const suratId = formData.get('id') as string;
   const filePath = formData.get('file_path') as string;
 

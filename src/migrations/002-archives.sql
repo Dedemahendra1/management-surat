@@ -83,7 +83,8 @@ create policy "Categories are insertable by authenticated users"
 create policy "Categories are updatable by authenticated users"
   on public.archive_categories for update
   to authenticated
-  using (true);
+  using (true)
+  with check (true);
 
 create policy "Categories are deletable by authenticated users"
   on public.archive_categories for delete
@@ -91,10 +92,15 @@ create policy "Categories are deletable by authenticated users"
   using (true);
 
 -- archives
+-- SELECT tidak boleh memakai USING (is_deleted = false): PostgreSQL mengevaluasi
+-- policy SELECT terhadap baris BARU hasil UPDATE, sehingga soft delete
+-- (is_deleted = true) gagal dengan "new row violates row-level security policy".
+-- Arsip boleh dihapus/dipulihkan oleh kedua role (admin & pimpinan); filter
+-- aktif/sampah dilakukan di query aplikasi.
 create policy "Archives are viewable by authenticated users"
   on public.archives for select
   to authenticated
-  using (is_deleted = false);
+  using (true);
 
 create policy "Archives are insertable by authenticated users"
   on public.archives for insert
@@ -104,7 +110,8 @@ create policy "Archives are insertable by authenticated users"
 create policy "Archives are updatable by authenticated users"
   on public.archives for update
   to authenticated
-  using (true);
+  using (true)
+  with check (true);
 
 create policy "Archives are deletable by authenticated users"
   on public.archives for delete

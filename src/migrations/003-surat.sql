@@ -91,10 +91,12 @@ create trigger on_surat_keluar_updated
 -- ─── 5. RLS Policies ─────────────────────────────────────────────────────────
 
 -- surat_masuk
+-- Lihat catatan pada policy surat_keluar: SELECT tidak boleh memakai
+-- USING (is_deleted = false) agar soft delete tidak gagal (RLS 42501).
 create policy "Surat Masuk are viewable by authenticated users"
   on public.surat_masuk for select
   to authenticated
-  using (is_deleted = false);
+  using (true);
 
 create policy "Surat Masuk are insertable by authenticated users"
   on public.surat_masuk for insert
@@ -104,18 +106,26 @@ create policy "Surat Masuk are insertable by authenticated users"
 create policy "Surat Masuk are updatable by authenticated users"
   on public.surat_masuk for update
   to authenticated
-  using (true);
+  using (true)
+  with check (true);
 
-create policy "Surat Masuk are deletable by authenticated users"
+create policy "Surat Masuk are deletable by admins"
   on public.surat_masuk for delete
   to authenticated
-  using (true);
+  using (
+    (select role from public.profiles where id = (select auth.uid())) = 'admin'
+  );
 
 -- surat_keluar
+-- Catatan: SELECT tidak boleh menyembunyikan baris terhapus (is_deleted = true).
+-- PostgreSQL mengevaluasi ulang policy SELECT terhadap baris BARU hasil UPDATE,
+-- sehingga soft delete (is_deleted = true) akan gagal dengan
+-- "new row violates row-level security policy" bila policy memakai
+-- USING (is_deleted = false). Filter aktif/sampah dilakukan di query aplikasi.
 create policy "Surat Keluar are viewable by authenticated users"
   on public.surat_keluar for select
   to authenticated
-  using (is_deleted = false);
+  using (true);
 
 create policy "Surat Keluar are insertable by authenticated users"
   on public.surat_keluar for insert
@@ -125,12 +135,15 @@ create policy "Surat Keluar are insertable by authenticated users"
 create policy "Surat Keluar are updatable by authenticated users"
   on public.surat_keluar for update
   to authenticated
-  using (true);
+  using (true)
+  with check (true);
 
-create policy "Surat Keluar are deletable by authenticated users"
+create policy "Surat Keluar are deletable by admins"
   on public.surat_keluar for delete
   to authenticated
-  using (true);
+  using (
+    (select role from public.profiles where id = (select auth.uid())) = 'admin'
+  );
 
 -- surat_logs
 create policy "Surat Logs are viewable by authenticated users"
