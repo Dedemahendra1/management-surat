@@ -27,6 +27,7 @@ import DialogCreateArchive from './dialog-create-archive';
 import DialogUpdateArchive from './dialog-update-archive';
 import DialogDeleteArchive from './dialog-delete-archive';
 import DialogDetailArchive from './dialog-detail-archive';
+import { useAuthStore } from '@/store/auth-store';
 
 function formatDate(date?: string | null): string {
   if (!date) return '-';
@@ -39,6 +40,9 @@ function formatDate(date?: string | null): string {
 
 export default function ArchiveManagement() {
   const supabase = createClient();
+  const profile = useAuthStore((state) => state.profile);
+  const role = profile?.role?.toLowerCase() || '';
+  const isPimpinan = role === 'pimpinan';
   const {
     currentPage,
     currentLimit,
@@ -162,59 +166,67 @@ export default function ArchiveManagement() {
                     setShowDetail(true);
                   },
                 },
-                {
-                  label: (
-                    <span className="flex items-center gap-2">
-                      <Pencil />
-                      Edit
-                    </span>
-                  ),
-                  action: () => {
-                    setSelectedAction({ data: item, type: 'update' });
-                  },
-                },
-                {
-                  label: (
-                    <span className="flex items-center gap-2">
-                      <Trash2 className="text-red-400" />
-                      Hapus
-                    </span>
-                  ),
-                  variant: 'destructive' as const,
-                  action: () => {
-                    setSelectedAction({ data: item, type: 'delete' });
-                  },
-                },
+                ...(isPimpinan
+                  ? [
+                      {
+                        label: (
+                          <span className="flex items-center gap-2">
+                            <Pencil />
+                            Edit
+                          </span>
+                        ),
+                        action: () => {
+                          setSelectedAction({ data: item, type: 'update' });
+                        },
+                      },
+                      {
+                        label: (
+                          <span className="flex items-center gap-2">
+                            <Trash2 className="text-red-400" />
+                            Hapus
+                          </span>
+                        ),
+                        variant: 'destructive' as const,
+                        action: () => {
+                          setSelectedAction({ data: item, type: 'delete' });
+                        },
+                      },
+                    ]
+                  : []),
               ]
             : [
-                {
-                  label: (
-                    <span className="flex items-center gap-2">
-                      <Undo2 />
-                      Pulihkan
-                    </span>
-                  ),
-                  action: async () => {
-                    const formData = new FormData();
-                    formData.append('id', item.id);
-                    const { restoreArchive } = await import('../actions');
-                    const result = await restoreArchive(
-                      { status: 'idle', errors: {} },
-                      formData,
-                    );
-                    if (result.status === 'success') {
-                      toast.success('Arsip berhasil dipulihkan');
-                      refetch();
-                    } else {
-                      toast.error('Gagal memulihkan arsip');
-                    }
-                  },
-                },
+                ...(isPimpinan
+                  ? [
+                      {
+                        label: (
+                          <span className="flex items-center gap-2">
+                            <Undo2 />
+                            Pulihkan
+                          </span>
+                        ),
+                        action: async () => {
+                          const formData = new FormData();
+                          formData.append('id', item.id);
+                          const { restoreArchive } = await import('../actions');
+                          const result = await restoreArchive(
+                            { status: 'idle', errors: {} },
+                            formData,
+                          );
+                          if (result.status === 'success') {
+                            toast.success('Arsip berhasil dipulihkan');
+                            refetch();
+                          } else {
+                            toast.error('Gagal memulihkan arsip');
+                          }
+                        },
+                      },
+                    ]
+                  : []),
               ]),
         ]}
       />,
     ]);
-  }, [archives, activeTab]);
+  }, [archives, activeTab, isPimpinan]);
 
   const totalPages = useMemo(() => {
     return archives && archives.count !== null
@@ -226,7 +238,7 @@ export default function ArchiveManagement() {
     <div className="w-full">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row w-full justify-between">
         <h1 className="text-2xl font-bold">Manajemen Arsip</h1>
-        {activeTab !== 'trash' && (
+        {activeTab !== 'trash' && isPimpinan && (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">+ Arsip Baru</Button>

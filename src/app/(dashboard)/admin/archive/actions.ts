@@ -27,6 +27,26 @@ export async function createArchive(
   prevState: ArchiveFormState,
   formData: FormData,
 ) {
+  const supabase = await createClient();
+  const user = await supabase.auth.getUser();
+  const userId = user.data.user?.id || '';
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.role?.toLowerCase() !== 'pimpinan') {
+    return {
+      status: 'error',
+      errors: {
+        ...prevState.errors,
+        _form: ['Hanya pimpinan yang dapat menambah arsip'],
+      },
+    };
+  }
+
   const validatedFields = createArchiveSchema.safeParse({
     title: formData.get('title'),
     category_id: formData.get('category_id'),
@@ -45,10 +65,6 @@ export async function createArchive(
       },
     };
   }
-
-  const supabase = await createClient();
-  const user = await supabase.auth.getUser();
-  const userId = user.data.user?.id || '';
 
   let fileUrl = '';
   let filePath = '';
@@ -113,6 +129,26 @@ export async function updateArchive(
   prevState: ArchiveFormState,
   formData: FormData,
 ) {
+  const supabase = await createClient();
+  const user = await supabase.auth.getUser();
+  const userId = user.data.user?.id || '';
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.role?.toLowerCase() !== 'pimpinan') {
+    return {
+      status: 'error',
+      errors: {
+        ...prevState.errors,
+        _form: ['Hanya pimpinan yang dapat mengubah arsip'],
+      },
+    };
+  }
+
   const validatedFields = updateArchiveSchema.safeParse({
     title: formData.get('title'),
     category_id: formData.get('category_id'),
@@ -132,9 +168,6 @@ export async function updateArchive(
     };
   }
 
-  const supabase = await createClient();
-  const user = await supabase.auth.getUser();
-  const userId = user.data.user?.id || '';
   const archiveId = formData.get('id') as string;
 
   let fileUrl = (formData.get('old_file_url') as string) || '';
@@ -205,6 +238,23 @@ export async function deleteArchive(
   const supabase = await createClient();
   const user = await supabase.auth.getUser();
   const userId = user.data.user?.id || '';
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.role?.toLowerCase() !== 'pimpinan') {
+    return {
+      status: 'error',
+      errors: {
+        ...prevState.errors,
+        _form: ['Hanya pimpinan yang dapat menghapus arsip'],
+      },
+    };
+  }
+
   const archiveId = formData.get('id') as string;
   const filePath = formData.get('file_path') as string;
 
@@ -248,6 +298,23 @@ export async function restoreArchive(
   const supabase = await createClient();
   const user = await supabase.auth.getUser();
   const userId = user.data.user?.id || '';
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.role?.toLowerCase() !== 'pimpinan') {
+    return {
+      status: 'error',
+      errors: {
+        ...prevState.errors,
+        _form: ['Hanya pimpinan yang dapat memulihkan arsip'],
+      },
+    };
+  }
+
   const archiveId = formData.get('id') as string;
 
   const { error } = await supabase
